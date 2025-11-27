@@ -4,10 +4,7 @@
             <!-- Cabeçalho -->
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                    <h5 class="mb-1 fw-semibold">Ordem de Serviço</h5>
-                    <small class="text-muted d-block">
-                        Técnico: {{ userName || '—' }}
-                    </small>
+                    <h5 class="mb-1 fw-semibold">{{ item.nome }}</h5>
                 </div>
                 <div class="text-end">
                     <small class="text-muted d-block">

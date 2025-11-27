@@ -32,10 +32,16 @@
           :disabled="disabled" />
       </div>
 
-      <div class="mb-0">
+      <div class="mb-3">
         <label class="form-label">Descrição</label>
-        <textarea v-model="localForm.descricao" class="form-control" rows="4" placeholder="Descreva o serviço"
+        <textarea v-model="localForm.descricao" class="form-control" rows="4" placeholder="Descrição"
           :disabled="disabled"></textarea>
+      </div>
+
+      <div class="mb-0" v-if="showExtraField">
+        <label class="form-label">Observações do Técnico</label>
+        <textarea v-model="localForm.observacoesTecnico" class="form-control" rows="3"
+          placeholder="Anotações feitas durante a execução" :disabled="!allowExtraField"></textarea>
       </div>
     </div>
   </div>
@@ -50,6 +56,14 @@ export default {
       required: true
     },
     disabled: {
+      type: Boolean,
+      default: false
+    },
+    showExtraField: {
+      type: Boolean,
+      default: false
+    },
+    allowExtraField: {
       type: Boolean,
       default: false
     }

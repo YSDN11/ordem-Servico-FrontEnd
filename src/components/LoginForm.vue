@@ -26,16 +26,34 @@
 </template>
 
 <script>
+import api from '../services/api.js';
+
 export default {
     name: 'LoginForm',
     data() {
         return {
             email: '',
-            password: ''
+            password: '',
+            loading: false,
+            error: '',
         };
     },
     methods: {
-        handleSubmit() {
+        async handleSubmit() {
+            // this.error = '';
+            // this.loading = true;
+
+            // try{
+            //     const res = await api.post('/login', {
+            //         email: this.email,
+            //         password: this.password
+            //     });
+
+
+            // }
+            // catch(e){
+
+            // }
             const nome = this.email || 'Usuário';
             this.$emit('update-user-name', nome);
             this.$router.push('/orders');
