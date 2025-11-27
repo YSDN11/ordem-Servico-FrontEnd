@@ -66,7 +66,7 @@ export default {
     },
     validar() {
       if (!this.form.nome.trim()) {
-        this.erro = 'Preencha o campo "Nome".';
+        this.erro = 'Preencha o campo "Título".';
         this.sucesso = '';
         return false;
       }

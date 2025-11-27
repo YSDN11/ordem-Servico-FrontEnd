@@ -28,10 +28,7 @@
 </template>
 
 <script>
-import api from '../services/api';
-
-const TOKEN_KEY = 'authToken';
-const USER_KEY = 'authUser';
+import { login } from '../services/authService';
 
 export default {
     name: 'LoginForm',
@@ -49,27 +46,11 @@ export default {
             this.loading = true;
 
             try {
-                const { data } = await api.post('/auth/login', {
-                    userNameOrEmail: this.userNameOrEmail,
-                    password: this.password
-                });
-
-                const { token, user } = data;
-
-                localStorage.setItem(TOKEN_KEY, token);
-                localStorage.setItem(USER_KEY, JSON.stringify(user));
-
-                const nome =
-                    (user && (user.userName || user.username || user.email)) ||
-                    this.userNameOrEmail ||
-                    'Usuário';
-
-                this.$emit('update-user-name', nome);
+                const { user } = await login(this.userNameOrEmail, this.password);
+                this.$emit('update-user-name', user.userName || user.email || 'Usuário');
                 this.$router.push('/orders');
-
             } catch (e) {
-                console.error(e);
-                this.error = 'Usuário ou senha inválidos.';
+                this.error = 'Credenciais inválidas.';
             } finally {
                 this.loading = false;
             }

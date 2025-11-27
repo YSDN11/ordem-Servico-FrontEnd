@@ -10,12 +10,6 @@
             Cadastre, edite ou remova as tarefas usadas no checklist das ordens.
           </p>
         </div>
-
-        <button type="button" class="btn btn-outline-secondary rounded-4 d-flex align-items-center gap-2"
-          @click="$router.push('/orders')">
-          <i class="bi bi-card-checklist"></i>
-          <span>Ver ordens</span>
-        </button>
       </div>
 
       <div class="card border-0 shadow-sm p-3" style="border-radius: 18px;">

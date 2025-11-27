@@ -126,7 +126,8 @@ export default {
         JSON.stringify(this.originalConcluidas.slice().sort());
       const mudouFotos = fotosAtualJson !== this.originalFotosJson;
 
-      if (!mudouChecklist && !mudouFotos) {
+      // se quiser, pode sempre permitir salvar observações:
+      if (!mudouChecklist && !mudouFotos && !this.form.observacoesTecnico) {
         this.sucesso = 'Nenhuma alteração para salvar.';
         this.erro = '';
         return;
@@ -136,7 +137,8 @@ export default {
         await updateOrder(this.ordemId, {
           tarefasConcluidasIds,
           fotos: this.fotos.map(f => f.data),
-          qtdFotos: this.fotos.length
+          qtdFotos: this.fotos.length,
+          observacoesTecnico: this.form.observacoesTecnico   // novo
         });
 
         this.sucesso = 'Alterações salvas com sucesso.';

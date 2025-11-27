@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../services/api';
 
 export async function getOrdersAndTasks(page = 1, pageSize = 5, search = '') {
   const ordersRes = await api.get('/orders', {
