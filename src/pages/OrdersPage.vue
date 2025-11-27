@@ -16,6 +16,30 @@
         </button>
       </div>
 
+      <!-- Filtro e paginação (configuração) -->
+      <div class="d-flex flex-wrap gap-3 mb-3 align-items-end">
+        <div style="max-width: 280px; width: 100%;">
+          <label class="form-label mb-1">Buscar por título</label>
+          <input type="text" v-model="filtroTitulo" class="form-control"
+            placeholder="Digite parte do título da ordem" />
+        </div>
+
+        <div>
+          <label class="form-label mb-1">Itens por página</label>
+          <select v-model.number="itensPorPagina" class="form-select">
+            <option v-for="opt in itensPorPaginaOptions" :key="opt" :value="opt">
+              {{ opt }}
+            </option>
+          </select>
+        </div>
+
+        <div class="ms-auto" v-if="ordersEnriquecidas.length">
+          <small class="text-muted">
+            Página {{ paginaAtual }} de {{ totalPaginas }}
+          </small>
+        </div>
+      </div>
+
       <p v-if="erro" class="text-danger">{{ erro }}</p>
       <p v-if="carregando" class="text-muted">Carregando ordens...</p>
 
@@ -24,8 +48,23 @@
       </div>
 
       <div v-else>
-        <CartItemCard v-for="item in ordersEnriquecidas" :key="item.id" :item="item" :userName="userName"
+        <CartItemCard v-for="item in ordersPaginadas" :key="item.id" :item="item" :userName="userName"
           @editar="editarOrdem" @excluir="confirmarExclusao" />
+      </div>
+
+      <!-- Controles de página -->
+      <div v-if="ordersEnriquecidas.length" class="d-flex justify-content-center align-items-center gap-2 mt-3">
+        <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="paginaAtual === 1"
+          @click="irParaPagina(paginaAtual - 1)">
+          Anterior
+        </button>
+
+        <span> Página {{ paginaAtual }} / {{ totalPaginas }} </span>
+
+        <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="paginaAtual === totalPaginas"
+          @click="irParaPagina(paginaAtual + 1)">
+          Próxima
+        </button>
       </div>
 
       <!-- Modal de confirmação -->
@@ -49,7 +88,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -57,6 +95,7 @@
 <script>
 import TopNavbar from '../components/TopNavbar.vue';
 import CartItemCard from '../components/CartItemCard.vue';
+import { getOrdersAndTasks, deleteOrder } from '../services/orderService';
 
 export default {
   name: 'OrdersPage',
@@ -66,23 +105,28 @@ export default {
   },
   data() {
     return {
-      apiBase: 'http://localhost:3001',
       orders: [],
       tasks: [],
+      totalOrders: 0,
       ordemParaExcluir: null,
       carregando: false,
-      erro: ''
+      erro: '',
+      filtroTitulo: '',
+      itensPorPaginaOptions: [5, 10, 15, 20],
+      itensPorPagina: 5,
+      paginaAtual: 1
     };
   },
   computed: {
     ordersEnriquecidas() {
       if (!this.tasks.length) return [];
-
       return this.orders.map(order => {
-        const tarefasMarcadas = (order.tarefasIds || []).map(id => {
-          const t = this.tasks.find(task => task.id === id);
-          return t ? t.titulo : '';
-        }).filter(Boolean);
+        const tarefasMarcadas = (order.tarefasIds || [])
+          .map(id => {
+            const t = this.tasks.find(task => task.id === id);
+            return t ? t.titulo : '';
+          })
+          .filter(Boolean);
 
         return {
           ...order,
@@ -90,6 +134,24 @@ export default {
           totalTarefas: this.tasks.length
         };
       });
+    },
+    totalPaginas() {
+      if (!this.totalOrders) return 1;
+      return Math.ceil(this.totalOrders / this.itensPorPagina);
+    },
+    ordersPaginadas() {
+      // já vem paginado do back
+      return this.ordersEnriquecidas;
+    }
+  },
+  watch: {
+    filtroTitulo() {
+      this.paginaAtual = 1;
+      this.carregarDados();
+    },
+    itensPorPagina() {
+      this.paginaAtual = 1;
+      this.carregarDados();
     }
   },
   mounted() {
@@ -101,23 +163,26 @@ export default {
         this.carregando = true;
         this.erro = '';
 
-        const [resOrders, resTasks] = await Promise.all([
-          fetch(`${this.apiBase}/orders`),
-          fetch(`${this.apiBase}/tasks`)
-        ]);
+        const { orders, tasks, totalOrders } = await getOrdersAndTasks(
+          this.paginaAtual,
+          this.itensPorPagina,
+          this.filtroTitulo
+        );
 
-        if (!resOrders.ok || !resTasks.ok) {
-          throw new Error('Erro ao buscar dados');
-        }
-
-        this.orders = await resOrders.json();
-        this.tasks = await resTasks.json();
+        this.orders = orders;
+        this.tasks = tasks;
+        this.totalOrders = totalOrders;
       } catch (e) {
         console.error(e);
         this.erro = 'Não foi possível carregar as ordens de serviço.';
       } finally {
         this.carregando = false;
       }
+    },
+    irParaPagina(p) {
+      if (p < 1 || p > this.totalPaginas) return;
+      this.paginaAtual = p;
+      this.carregarDados();
     },
     editarOrdem(item) {
       const idStr = String(item.id);
@@ -128,24 +193,13 @@ export default {
     },
     async excluirConfirmado() {
       const id = String(this.ordemParaExcluir.id);
-      console.log('DELETE ordem id =', id);
-
       try {
-        const res = await fetch(`${this.apiBase}/orders/${id}`, {
-          method: 'DELETE'
-        });
-
-        if (!res.ok) {
-          throw new Error('DELETE falhou');
-        }
-
-        // recarrega do servidor
+        await deleteOrder(id);
         await this.carregarDados();
       } catch (e) {
         console.error(e);
         this.erro = 'Erro ao excluir a ordem.';
       } finally {
-        // garante que o modal sempre fecha
         this.ordemParaExcluir = null;
       }
     }

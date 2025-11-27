@@ -15,7 +15,8 @@
 
     <div class="card-body p-4">
       <div class="mb-3">
-        <input type="file" class="form-control" accept="image/*" multiple @change="onFilesSelected" />
+        <input type="file" class="form-control" accept="image/*" multiple :disabled="localFotos.length >= 3"
+          @change="onFilesSelected" />
       </div>
 
       <div v-if="localFotos.length">
@@ -64,7 +65,17 @@ export default {
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
 
-      files.forEach(file => {
+      const maxFotos = 3;
+      const espacoRestante = maxFotos - this.localFotos.length;
+      if (espacoRestante <= 0) {
+        // já tem 3, ignora tudo
+        event.target.value = '';
+        return;
+      }
+
+      const arquivosPermitidos = files.slice(0, espacoRestante);
+
+      arquivosPermitidos.forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
           const base64 = e.target.result;
