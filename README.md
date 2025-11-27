@@ -1,5 +1,31 @@
-# Vue 3 + Vite
+# Ordem de Serviço Web
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Aplicação web para gestão de ordens de serviço, frontend em Vue 3 + Vite.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+---
+
+## ✅ Pré-requisitos
+
+- [Node.js 18+](https://nodejs.org/) (com npm)
+- Git instalado
+
+---
+
+## 📥 Clonar o repositório
+https://github.com/SEU-USUARIO/ordem-Servico-FrontEnd.git
+
+## 🌐 Frontend (Vue 3 + Vite)
+
+1. Em outro terminal, entrar na pasta do frontend:
+cd ordem-servico-frontend
+
+
+2. Instalar dependências:
+npm install
+
+
+4. Rodar o servidor de desenvolvimento:
+npm run dev
+
+O frontend ficará disponível em:
+http://localhost:5173
