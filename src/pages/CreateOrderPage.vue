@@ -97,27 +97,23 @@ export default {
         endereco: this.form.endereco,
         cliente: this.form.cliente,
         descricao: this.form.descricao,
-        observacoesTecnico: this.form.observacoesTecnico,
-        tarefasIds: [],
-        tarefasConcluidasIds: [],
-        qtdFotos: 0,
-        fotos: []
+        observacoesTecnico: this.form.observacoesTecnico
       };
 
       try {
-        const criada = await createOrder(payload); // json-server por enquanto
-        const idStr = String(criada.id);
+        const ordemCriada = await createOrder(payload);
+        console.log('ordemCriada', ordemCriada);
 
-        this.sucesso = `Ordem #${idStr} criada com sucesso.`;
-        this.limpar();
+        if (!ordemCriada || typeof ordemCriada.id === 'undefined') {
+          this.erro = 'Resposta da API não contém id da ordem.';
+          return;
+        }
 
-        setTimeout(() => {
-          this.$router.push({ path: '/orders' });
-        }, 500);
+        this.sucesso = 'Ordem criada com sucesso!';
+        this.$router.push('/orders');
       } catch (e) {
         console.error(e);
-        this.erro = e.message || 'Erro ao salvar a ordem.';
-        this.sucesso = '';
+        this.erro = 'Erro ao comunicar com a API.';
       }
     }
   }

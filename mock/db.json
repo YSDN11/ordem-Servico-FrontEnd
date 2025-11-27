@@ -574,6 +574,14 @@
       "tarefasConcluidasIds": [],
       "qtdFotos": 0,
       "fotos": []
+    },
+    {
+      "id": "d67a",
+      "nome": "aabb",
+      "endereco": "a",
+      "cliente": "a",
+      "descricao": "a",
+      "observacoesTecnico": ""
     }
   ]
 }

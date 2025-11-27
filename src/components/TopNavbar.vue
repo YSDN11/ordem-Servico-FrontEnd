@@ -24,6 +24,11 @@
         
         <button type="button" class="btn btn-light rounded-4 position-relative" @click="$router.push('/orders')"
           title="Ver ordens">
+          <i class="bi bi-card-list fs-5"></i>
+        </button>
+
+        <button type="button" class="btn btn-light rounded-4 position-relative" @click="$router.push('/tasks')"
+          title="Ver tarefas">
           <i class="bi bi-card-checklist fs-5"></i>
         </button>
       

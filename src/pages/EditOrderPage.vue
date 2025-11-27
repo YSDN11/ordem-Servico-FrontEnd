@@ -99,7 +99,11 @@ export default {
           };
         });
 
-        this.fotos = ordem.fotos || [];
+        this.fotos = (ordem.fotos || []).map((base64, index) => ({
+          nome: `Foto ${index + 1}`,
+          data: base64
+        }));
+
         this.originalConcluidas = concluidas.slice();
         this.originalFotosJson = JSON.stringify(this.fotos);
       } catch (e) {
@@ -131,7 +135,7 @@ export default {
       try {
         await updateOrder(this.ordemId, {
           tarefasConcluidasIds,
-          fotos: this.fotos,
+          fotos: this.fotos.map(f => f.data),
           qtdFotos: this.fotos.length
         });
 

@@ -88,7 +88,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -108,6 +107,7 @@ export default {
     return {
       orders: [],
       tasks: [],
+      totalOrders: 0,
       ordemParaExcluir: null,
       carregando: false,
       erro: '',
@@ -118,18 +118,9 @@ export default {
     };
   },
   computed: {
-    ordersFiltradas() {
-      const termo = this.filtroTitulo.trim().toLowerCase();
-      if (!termo) return this.orders;
-      return this.orders.filter(order =>
-        String(order.nome || '')
-          .toLowerCase()
-          .includes(termo)
-      );
-    },
     ordersEnriquecidas() {
       if (!this.tasks.length) return [];
-      return this.ordersFiltradas.map(order => {
+      return this.orders.map(order => {
         const tarefasMarcadas = (order.tarefasIds || [])
           .map(id => {
             const t = this.tasks.find(task => task.id === id);
@@ -145,21 +136,22 @@ export default {
       });
     },
     totalPaginas() {
-      if (!this.ordersEnriquecidas.length) return 1;
-      return Math.ceil(this.ordersEnriquecidas.length / this.itensPorPagina);
+      if (!this.totalOrders) return 1;
+      return Math.ceil(this.totalOrders / this.itensPorPagina);
     },
     ordersPaginadas() {
-      const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
-      const fim = inicio + this.itensPorPagina;
-      return this.ordersEnriquecidas.slice(inicio, fim);
+      // já vem paginado do back
+      return this.ordersEnriquecidas;
     }
   },
   watch: {
     filtroTitulo() {
       this.paginaAtual = 1;
+      this.carregarDados();
     },
     itensPorPagina() {
       this.paginaAtual = 1;
+      this.carregarDados();
     }
   },
   mounted() {
@@ -171,15 +163,26 @@ export default {
         this.carregando = true;
         this.erro = '';
 
-        const { orders, tasks } = await getOrdersAndTasks();
+        const { orders, tasks, totalOrders } = await getOrdersAndTasks(
+          this.paginaAtual,
+          this.itensPorPagina,
+          this.filtroTitulo
+        );
+
         this.orders = orders;
         this.tasks = tasks;
+        this.totalOrders = totalOrders;
       } catch (e) {
         console.error(e);
         this.erro = 'Não foi possível carregar as ordens de serviço.';
       } finally {
         this.carregando = false;
       }
+    },
+    irParaPagina(p) {
+      if (p < 1 || p > this.totalPaginas) return;
+      this.paginaAtual = p;
+      this.carregarDados();
     },
     editarOrdem(item) {
       const idStr = String(item.id);
@@ -190,8 +193,6 @@ export default {
     },
     async excluirConfirmado() {
       const id = String(this.ordemParaExcluir.id);
-      console.log('DELETE ordem id =', id);
-
       try {
         await deleteOrder(id);
         await this.carregarDados();
@@ -201,10 +202,6 @@ export default {
       } finally {
         this.ordemParaExcluir = null;
       }
-    },
-    irParaPagina(p) {
-      if (p < 1 || p > this.totalPaginas) return;
-      this.paginaAtual = p;
     }
   }
 };

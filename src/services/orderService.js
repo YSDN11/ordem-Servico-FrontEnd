@@ -1,53 +1,19 @@
-// Serviço de ordens centralizado
+import api from './api';
 
-// =====================
-// Código usando json-server
-// =====================
-
-const JSON_SERVER_BASE = 'http://localhost:3001';
-
-export async function getOrdersAndTasks() {
-  const [resOrders, resTasks] = await Promise.all([
-    fetch(`${JSON_SERVER_BASE}/orders`),
-    fetch(`${JSON_SERVER_BASE}/tasks`)
-  ]);
-
-  if (!resOrders.ok || !resTasks.ok) {
-    throw new Error('Erro ao buscar dados (json-server).');
-  }
+export async function getOrdersAndTasks(page = 1, pageSize = 5, search = '') {
+  const ordersRes = await api.get('/orders', {
+    params: { page, pageSize, search }
+  });
+  const tasksRes = await api.get('/tasks');
 
   return {
-    orders: await resOrders.json(),
-    tasks: await resTasks.json()
+    orders: ordersRes.data.items,
+    totalOrders: ordersRes.data.total,
+    tasks: tasksRes.data
   };
 }
 
 export async function deleteOrder(id) {
-  const res = await fetch(`${JSON_SERVER_BASE}/orders/${id}`, {
-    method: 'DELETE'
-  });
-
-  if (!res.ok) {
-    throw new Error('Erro ao excluir ordem (json-server).');
-  }
-
+  await api.delete('/orders/' + id);
   return true;
 }
-
-// =====================
-// Código usando axios + back end real
-// (deixe comentado para uso futuro)
-// =====================
-
-// import api from './api';
-//
-// export async function getOrdersAndTasks() {
-//   const ordersRes = await api.get('/orders');
-//   const tasksRes = await api.get('/tasks');
-//   return { orders: ordersRes.data, tasks: tasksRes.data };
-// }
-//
-// export async function deleteOrder(id) {
-//   await api.delete('/orders/' + id);
-//   return true;
-// }
